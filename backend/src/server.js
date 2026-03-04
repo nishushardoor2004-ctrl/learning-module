@@ -42,9 +42,13 @@ app.use('/api/lessons', lessonRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/progress', progressRoutes);
 
-// Health check endpoint
+// Health check endpoint (for Render and other platforms)
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Server is running', timestamp: new Date().toISOString() });
+});
+
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+  res.json({ status: 'OK', message: 'Server is running', timestamp: new Date().toISOString() });
 });
 
 // Root endpoint
@@ -52,7 +56,9 @@ app.get('/', (req, res) => {
   res.json({
     message: 'LMS API Server',
     version: '1.0.0',
+    status: 'running',
     endpoints: {
+      health: '/health',
       auth: '/api/auth',
       courses: '/api/courses',
       sections: '/api/sections',
