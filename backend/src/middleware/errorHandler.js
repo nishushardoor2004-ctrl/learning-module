@@ -1,0 +1,44 @@
+const errorHandler = (err, req, res, next) => {
+  console.error('Error:', err);
+
+  // Sequelize validation errors
+  if (err.name === 'SequelizeValidationError') {
+    return res.status(400).json({
+      message: 'Validation error',
+      errors: err.errors.map(e => ({
+        field: e.path,
+        message: e.message
+      }))
+    });
+  }
+
+  // Sequelize unique constraint errors
+  if (err.name === 'SequelizeUniqueConstraintError') {
+    return res.status(409).json({
+      message: 'Duplicate entry',
+      errors: err.errors.map(e => ({
+        field: e.path,
+        message: e.message
+      }))
+    });
+  }
+
+  // Sequelize foreign key errors
+  if (err.name === 'SequelizeForeignKeyConstraintError') {
+    return res.status(400).json({
+      message: 'Invalid reference',
+      error: err.message
+    });
+  }
+
+  // Default error
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal server error';
+
+  res.status(statusCode).json({
+    message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+};
+
+module.exports = errorHandler;
